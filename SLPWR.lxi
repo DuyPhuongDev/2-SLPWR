@@ -1,0 +1,33 @@
+B 3 C o m p i l a t i o n
+B 172 Include File Summary
+B 184 Equation Listing    SOLVE SLP Using MIP From line 55
+D 187 obj
+D 192 cond1
+D 203 cond2
+D 214 xcond
+D 225 ycond
+D 236 zcond
+B 248 Column Listing      SOLVE SLP Using MIP From line 55
+E 251 x
+E 276 y
+E 298 z
+E 331 g
+B 339 Range Statistics    SOLVE SLP Using MIP From line 55
+B 350 Model Statistics    SOLVE SLP Using MIP From line 55
+B 363 Solution Report     SOLVE SLP Using MIP From line 55
+F 408 obj
+F 412 cond1
+F 433 cond2
+F 448 xcond
+F 458 ycond
+F 473 zcond
+G 494 x
+G 504 y
+G 519 z
+G 542 g
+B 552 E x e c u t i o n
+I 554 g
+I 555 x
+I 560 y
+I 571 z
+I 585 d

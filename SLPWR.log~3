@@ -1,0 +1,35 @@
+
+--- Job SLPWR.gms Start 12/12/23 23:40:38 45.4.0 19dc3313 WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\45\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input "D:\HCMUT\HK231\Math Model\BTL\SLPWR.gms"
+    PageSize 0
+    ScrDir "D:\HCMUT\HK231\Math Model\BTL\225a\"
+    SysDir C:\GAMS\45\
+    LogOption 3
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: GAMS Demo, for EULA and demo limitations see   G230930/0001CB-GEN
+          https://www.gams.com/latest/docs/UG%5FLicense.html         DC0000
+          C:\GAMS\45\gamslice.txt
+          Demo license for demonstration and instructional purposes only
+Processor information: 1 socket(s), 4 core(s), and 8 thread(s) available
+GAMS 45.4.0   Copyright (C) 1987-2023 GAMS Development. All rights reserved
+--- Starting compilation
+--- SLPWR.gms(57) 3 Mb 2 Errors
+*** Error  71 in D:\HCMUT\HK231\Math Model\BTL\SLPWR.gms
+    The symbol shown has been declared as an equation, but no
+       Symbolic equation (..) was found. hint - look for commas in the
+       Documentation text for the equations. use quotes around the
+       Text or eliminate the commas.
+*** Error 256 in D:\HCMUT\HK231\Math Model\BTL\SLPWR.gms
+    Error(s) in analyzing solve statement.
+*** The following MIP errors were detected in model SLP:
+     71 st1obj is an undefined equation
+     71 st2obj is an undefined equation
+--- SLPWR.gms(61) 3 Mb 2 Errors
+*** Status: Compilation error(s)
+--- Job SLPWR.gms Stop 12/12/23 23:40:38 elapsed 0:00:00.007

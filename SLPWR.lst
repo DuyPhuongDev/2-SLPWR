@@ -1,0 +1,612 @@
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  Set
+   2      i   "product"   /i1,i2,i3,i4,i5,i6,i7,i8/
+   3      j   'parts'     /j1,j2,j3,j4,j5/
+   4      k   'scenatio'  /k1,k2/;
+   5  Parameter Table  A(i,j)   "num of part j for product i"
+   6          j1  j2  j3  j4  j5
+   7      i1  1   1   3   0   0
+   8      i2  2   2   1   1   2
+   9      i3  3   0   0   3   3
+  10      i4  2   1   3   2   1
+  11      i5  1   2   1   0   1
+  12      i6  0   0   2   1   2
+  13      i7  1   3   2   2   4
+  14      i8  1   2   1   0   0;
+  15  Parameters
+  16      l(i)    "sub cost to make product i"    /i1 19, i2 19, i3 16, i4 14, i5 19, i6 13, i7 10, i8 24/
+  17      q(i)    "price of product i"    /i1 197, i2 186, i3 199, i4 179, i5 179, i6 155, i7 193, i8 167/;
+  18  Parameters
+  19      b(j)    "cost to order part j"  /j1 8, j2 12, j3 12, j4 14, j5 9/
+  20      s(j)    "price sell part j"     /j1 7,j2 6, j3 4, j4 6, j5 7/;
+  21  Parameter
+  22      d(i,k)  "demand of product i in each scenario";
+  23  Parameter
+  24      p(k)    "probaly of scenario"   /k1 0.5, k2 0.5/;
+FUNCLIBIN  stolib stodclib
+Function Library stolib
+Random deviates, probability density function, cumulative distribution function, inverse cumulative distribution function
+GAMS Development Corporation
+
+Mod. Function                          Description
+Type
+
+none SetSeed(SEED)                     Define the seed for random number generator
+none dUniform(LOW,HIGH)                Uniform distribution
+DNLP pdfUniform(x,LOW,HIGH)            Probability density function for uniform distribution
+DNLP cdfUniform(x,LOW,HIGH)            Cumulative distribution function for uniform distribution
+DNLP icdfUniform(x,LOW,HIGH)           Inverse cumulative distribution function for uniform distribution
+none dNormal(MEAN,STD_DEV)             Normal distribution
+NLP  pdfNormal(x,MEAN,STD_DEV)         Probability density function for normal distribution
+NLP  cdfNormal(x,MEAN,STD_DEV)         Cumulative distribution function for normal distribution
+NLP  icdfNormal(x,MEAN,STD_DEV)        Inverse cumulative distribution function for normal distribution
+none dInvGaussian(MEAN,SHAPE)          Inverse Gaussian distribution
+NLP  pdfInvGaussian(x,MEAN,SHAPE)      Probability density function for inverse Gaussian distribution
+NLP  cdfInvGaussian(x,MEAN,SHAPE)      Cumulative distribution function for inverse Gaussian distribution
+NLP  icdfInvGaussian(x,MEAN,SHAPE)     Inverse cumulative distribution function for inverse Gaussian distribution
+none dRayleigh(SIGMA)                  Rayleigh distribution
+NLP  pdfRayleigh(x,SIGMA)              Probability density function for Rayleigh distribution
+NLP  cdfRayleigh(x,SIGMA)              Cumulative distribution function for Rayleigh distribution
+NLP  icdfRayleigh(x,SIGMA)             Inverse cumulative distribution function for Rayleigh distribution
+none dCauchy(LOCATION,SCALE)           Cauchy distribution
+NLP  pdfCauchy(x,LOCATION,SCALE)       Probability density function for Cauchy distribution
+NLP  cdfCauchy(x,LOCATION,SCALE)       Cumulative distribution function for Cauchy distribution
+NLP  icdfCauchy(x,LOCATION,SCALE)      Inverse cumulative distribution function for Cauchy distribution
+none dLognormal(LOCATION,SCALE)        Lognormal distribution
+NLP  pdfLognormal(x,LOCATION,SCALE)    Probability density function for Lognormal distribution
+NLP  cdfLognormal(x,LOCATION,SCALE)    Cumulative distribution function for Lognormal distribution
+NLP  icdfLognormal(x,LOCATION,SCALE)   Inverse cumulative distribution function for Lognormal distribution
+none dExponential(LAMBDA)              Exponential distribution
+NLP  pdfExponential(x,LAMBDA)          Probability density function for Exponential distribution
+NLP  cdfExponential(x,LAMBDA)          Cumulative distribution function for Exponential distribution
+NLP  icdfExponential(x,LAMBDA)         Inverse cumulative distribution function for Exponential distribution
+none dLogistic(LOCATION,SCALE)         Logistic distribution
+NLP  pdfLogistic(x,LOCATION,SCALE)     Probability density function for Logistic distribution
+NLP  cdfLogistic(x,LOCATION,SCALE)     Cumulative distribution function for Logistic distribution
+NLP  icdfLogistic(x,LOCATION,SCALE)    Inverse cumulative distribution function for Logistic distribution
+none dGamma(SHAPE,SCALE)               Gamma distribution
+NLP  pdfGamma(x,SHAPE,SCALE)           Probability density function for Gamma distribution
+NLP  cdfGamma(x,SHAPE,SCALE)           Cumulative distribution function for Gamma distribution
+NLP  icdfGamma(x,SHAPE,SCALE)          Inverse cumulative distribution function for Gamma distribution
+none dChiSquare(DF)                    Chi square distribution
+NLP  pdfChiSquare(x,DF)                Probability density function for Chi square distribution
+NLP  cdfChiSquare(x,DF)                Cumulative distribution function for Chi square distribution
+NLP  icdfChiSquare(x,DF)               Inverse cumulative distribution function for Chi square distribution
+none dWeibull(SHAPE,SCALE)             Weibull distribution
+NLP  pdfWeibull(x,SHAPE,SCALE)         Probability density function for Weibull distribution
+NLP  cdfWeibull(x,SHAPE,SCALE)         Cumulative distribution function for Weibull distribution
+NLP  icdfWeibull(x,SHAPE,SCALE)        Inverse cumulative distribution function for Weibull distribution
+none dBeta(SHAPE_1,SHAPE_2)            Beta distribution
+NLP  pdfBeta(x,SHAPE_1,SHAPE_2)        Probability density function for Beta distribution
+NLP  cdfBeta(x,SHAPE_1,SHAPE_2)        Cumulative distribution function for Beta distribution
+NLP  icdfBeta(x,SHAPE_1,SHAPE_2)       Inverse cumulative distribution function for Beta distribution
+none dF(DF_1,DF_2)                     F distribution
+NLP  pdfF(x,DF_1,DF_2)                 Probability density function for F distribution
+NLP  cdfF(x,DF_1,DF_2)                 Cumulative distribution function for F distribution
+NLP  icdfF(x,DF_1,DF_2)                Inverse cumulative distribution function for F distribution
+none dStudentT(DF)                     Students T distribution
+NLP  pdfStudentT(x,DF)                 Probability density function for Students T distribution
+NLP  cdfStudentT(x,DF)                 Cumulative distribution function for Students T distribution
+NLP  icdfStudentT(x,DF)                Inverse cumulative distribution function for Students T distribution
+none dPareto(SCALE,SHAPE)              Pareto distribution
+NLP  pdfPareto(x,SCALE,SHAPE)          Probability density function for Pareto distribution
+NLP  cdfPareto(x,SCALE,SHAPE)          Cumulative distribution function for Pareto distribution
+NLP  icdfPareto(x,SCALE,SHAPE)         Inverse cumulative distribution function for Pareto distribution
+none dGumbel(LOCATION,SCALE)           Gumbel distribution
+NLP  pdfGumbel(x,LOCATION,SCALE)       Probability density function for Gumbel distribution
+NLP  cdfGumbel(x,LOCATION,SCALE)       Cumulative distribution function for Gumbel distribution
+NLP  icdfGumbel(x,LOCATION,SCALE)      Inverse cumulative distribution function for Gumbel distribution
+none dLaplace(MEAN,SCALE)              Laplace distribution
+DNLP pdfLaplace(x,MEAN,SCALE)          Probability density function for Laplace distribution
+DNLP cdfLaplace(x,MEAN,SCALE)          Cumulative distribution function for Laplace distribution
+DNLP icdfLaplace(x,MEAN,SCALE)         Inverse cumulative distribution function for Laplace distribution
+none dTriangular(LOW,MID,HIGH)         Triangular distribution
+DNLP pdfTriangular(x,LOW,MID,HIGH)     Probability density function for Triangular distribution
+DNLP cdfTriangular(x,LOW,MID,HIGH)     Cumulative distribution function for Triangular distribution
+DNLP icdfTriangular(x,LOW,MID,HIGH)    Inverse cumulative distribution function for Triangular distribution
+none dUniformInt(LOW,HIGH)             Uniform integer distribution
+none pdfUniformInt(x,LOW,HIGH)         Probability density function for Uniform integer distribution
+none cdfUniformInt(x,LOW,HIGH)         Cumulative distribution function for Uniform integer distribution
+none icdfUniformInt(x,LOW,HIGH)        Inverse cumulative distribution function for Uniform integer distribution
+none dBinomial(N,P)                    Binomial distribution
+none pdfBinomial(x,N,P)                Probability density function for Binomial distribution
+none cdfBinomial(x,N,P)                Cumulative distribution function for Binomial distribution
+none icdfBinomial(x,N,P)               Inverse cumulative distribution function for Binomial distribution
+none dNegBinomial(FAILURES,P)          Negative Binomial distribution
+none pdfNegBinomial(x,FAILURES,P)      Probability density function for Negative Binomial distribution
+none cdfNegBinomial(x,FAILURES,P)      Cumulative distribution function for Negative Binomial distribution
+none icdfNegBinomial(x,FAILURES,P)     Inverse cumulative distribution function for Negative Binomial distribution
+none dGeometric(P)                     Geometric distribution
+none pdfGeometric(x,P)                 Probability density function for Geometric distribution
+none cdfGeometric(x,P)                 Cumulative distribution function for Geometric distribution
+none icdfGeometric(x,P)                Inverse cumulative distribution function for Geometric distribution
+none dHyperGeo(TOTAL,GOOD,TRIALS)      HyperGeometric distribution
+none pdfHyperGeo(x,TOTAL,GOOD,TRIALS)  Probability density function for HyperGeometric distribution
+none cdfHyperGeo(x,TOTAL,GOOD,TRIALS)  Cumulative distribution function for HyperGeometric distribution
+none icdfHyperGeo(x,TOTAL,GOOD,TRIALS) Inverse cumulative distribution function for HyperGeometric distribution
+none dLogarithmic(P-FACTOR)            Logarithmic distribution
+none pdfLogarithmic(x,P-FACTOR)        Probability density function for Logarithmic distribution
+none cdfLogarithmic(x,P-FACTOR)        Cumulative distribution function for Logarithmic distribution
+none icdfLogarithmic(x,P-FACTOR)       Inverse cumulative distribution function for Logarithmic distribution
+none dPoisson(LAMBDA)                  Poisson distribution
+none pdfPoisson(x,LAMBDA)              Probability density function for Poisson distribution
+none cdfPoisson(x,LAMBDA)              Cumulative distribution function for Poisson distribution
+none icdfPoisson(x,LAMBDA)             Inverse cumulative distribution function for Poisson distribution
+
+  26  function
+  27      randbin /stolib.dbinomial /
+  28      setseedh /stolib.SetSeed / ;
+  29   
+  30  Integer Variables
+  31      x(j)    "num of part ordered"
+  32      y(j,k)  "num of part left"
+  33      z(i,k)  "num of product";
+  34  Variable g total profit
+  35  Equations
+  36      obj objective function
+  37      cond1   z<=d
+  38      cond2   y=x-A^T*z
+  39      xcond   x>=0
+  40      ycond   y>=0
+  41      zcond   z>=0;
+  42   
+  43      obj..   g =e= sum(j,x(j)*b(j))+sum(k,p(k)*(sum(i,(l(i)-q(i))*z(i,k))-sum(j,s(j)*y(j,k))));
+  44      cond1(i,k)..    z(i,k)=l=d(i,k);
+  45      cond2(j,k)..    y(j,k)=e=x(j)-sum(i,A(i,j)*z(i,k));
+  46   
+  47      xcond(j)..  0 =l= x(j);
+  48      ycond(j,k).. 0 =l= y(j,k);
+  49      zcond(i,k).. 0 =l= z(i,k);
+  50   
+  51   
+  52  Model SLP   /all/;
+  53  d(i, k) = randbin(10,0.5);
+  54  solve SLP using mip minimizing g
+  55  display g.l, x.l, y.l, z.l, d;
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Include File Summary
+
+
+   SEQ   GLOBAL TYPE      PARENT   LOCAL  FILENAME
+
+     1        1 INPUT          0       0  D:\HCMUT\HK231\Math Model\BTL\SLPWR.gms
+     2       25 FUNCLIBIN      1      25  stodclib
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  45.4.0 19dc3313 WEX-WEI
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE SLP Using MIP From line 55
+
+
+---- obj  =E=  objective function
+
+obj..  - 8*x(j1) - 12*x(j2) - 12*x(j3) - 14*x(j4) - 9*x(j5) + 3.5*y(j1,k1) + 3.5*y(j1,k2) + 3*y(j2,k1) + 3*y(j2,k2) + 2*y(j3,k1) + 2*y(j3,k2) + 3*y(j4,k1) + 3*y(j4,k2) + 3.5*y(j5,k1) + 3.5*y(j5,k2) + 89*z(i1,k1) + 89*z(i1,k2) + 83.5*z(i2,k1) + 83.5*z(i2,k2) + 91.5*z(i3,k1) + 91.5*z(i3,k2) + 82.5*z(i4,k1) + 82.5*z(i4,k2) + 80*z(i5,k1) + 80*z(i5,k2) + 71*z(i6,k1) + 71*z(i6,k2) + 91.5*z(i7,k1) + 91.5*z(i7,k2) + 71.5*z(i8,k1) + 71.5*z(i8,k2) + g =E= 0 ; (LHS = 0)
+     
+
+---- cond1  =L=  z<=d
+
+cond1(i1,k1)..  z(i1,k1) =L= 3 ; (LHS = 0)
+     
+cond1(i1,k2)..  z(i1,k2) =L= 7 ; (LHS = 0)
+     
+cond1(i2,k1)..  z(i2,k1) =L= 5 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+
+---- cond2  =E=  y=x-A^T*z
+
+cond2(j1,k1)..  - x(j1) + y(j1,k1) + z(i1,k1) + 2*z(i2,k1) + 3*z(i3,k1) + 2*z(i4,k1) + z(i5,k1) + z(i7,k1) + z(i8,k1) =E= 0 ; (LHS = 0)
+     
+cond2(j1,k2)..  - x(j1) + y(j1,k2) + z(i1,k2) + 2*z(i2,k2) + 3*z(i3,k2) + 2*z(i4,k2) + z(i5,k2) + z(i7,k2) + z(i8,k2) =E= 0 ; (LHS = 0)
+     
+cond2(j2,k1)..  - x(j2) + y(j2,k1) + z(i1,k1) + 2*z(i2,k1) + z(i4,k1) + 2*z(i5,k1) + 3*z(i7,k1) + 2*z(i8,k1) =E= 0 ; (LHS = 0)
+     
+REMAINING 7 ENTRIES SKIPPED
+
+
+---- xcond  =L=  x>=0
+
+xcond(j1)..  - x(j1) =L= 0 ; (LHS = 0)
+     
+xcond(j2)..  - x(j2) =L= 0 ; (LHS = 0)
+     
+xcond(j3)..  - x(j3) =L= 0 ; (LHS = 0)
+     
+REMAINING 2 ENTRIES SKIPPED
+
+
+---- ycond  =L=  y>=0
+
+ycond(j1,k1)..  - y(j1,k1) =L= 0 ; (LHS = 0)
+     
+ycond(j1,k2)..  - y(j1,k2) =L= 0 ; (LHS = 0)
+     
+ycond(j2,k1)..  - y(j2,k1) =L= 0 ; (LHS = 0)
+     
+REMAINING 7 ENTRIES SKIPPED
+
+
+---- zcond  =L=  z>=0
+
+zcond(i1,k1)..  - z(i1,k1) =L= 0 ; (LHS = 0)
+     
+zcond(i1,k2)..  - z(i1,k2) =L= 0 ; (LHS = 0)
+     
+zcond(i2,k1)..  - z(i2,k1) =L= 0 ; (LHS = 0)
+     
+REMAINING 13 ENTRIES SKIPPED
+
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE SLP Using MIP From line 55
+
+
+---- x  num of part ordered
+
+x(j1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -8       obj
+       -1       cond2(j1,k1)
+       -1       cond2(j1,k2)
+       -1       xcond(j1)
+
+x(j2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -12       obj
+       -1       cond2(j2,k1)
+       -1       cond2(j2,k2)
+       -1       xcond(j2)
+
+x(j3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -12       obj
+       -1       cond2(j3,k1)
+       -1       cond2(j3,k2)
+       -1       xcond(j3)
+
+REMAINING 2 ENTRIES SKIPPED
+
+---- y  num of part left
+
+y(j1,k1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        3.5     obj
+        1       cond2(j1,k1)
+       -1       ycond(j1,k1)
+
+y(j1,k2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        3.5     obj
+        1       cond2(j1,k2)
+       -1       ycond(j1,k2)
+
+y(j2,k1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        3       obj
+        1       cond2(j2,k1)
+       -1       ycond(j2,k1)
+
+REMAINING 7 ENTRIES SKIPPED
+
+---- z  num of product
+
+z(i1,k1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       89       obj
+        1       cond1(i1,k1)
+        1       cond2(j1,k1)
+        1       cond2(j2,k1)
+        3       cond2(j3,k1)
+       -1       zcond(i1,k1)
+
+z(i1,k2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       89       obj
+        1       cond1(i1,k2)
+        1       cond2(j1,k2)
+        1       cond2(j2,k2)
+        3       cond2(j3,k2)
+       -1       zcond(i1,k2)
+
+z(i2,k1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       83.5     obj
+        1       cond1(i2,k1)
+        2       cond2(j1,k1)
+        2       cond2(j2,k1)
+        1       cond2(j3,k1)
+        1       cond2(j4,k1)
+        2       cond2(j5,k1)
+       -1       zcond(i2,k1)
+
+REMAINING 13 ENTRIES SKIPPED
+
+---- g  total profit
+
+g
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       obj
+
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE SLP Using MIP From line 55
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 3.000E+00, 9.000E+00] - Zero values observed as well
+Bound     [min, max] : [        NA,        NA] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 9.150E+01]
+
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE SLP Using MIP From line 55
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           6     SINGLE EQUATIONS           58
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           32
+NON ZERO ELEMENTS           161     DISCRETE VARIABLES         31
+
+
+GENERATION TIME      =        0.141 SECONDS      4 MB  45.4.0 19dc3313 WEX-WEI
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE SLP Using MIP From line 55
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   SLP                 OBJECTIVE  g
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  55
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE            -3449.5000
+
+ RESOURCE USAGE, LIMIT          0.031 10000000000.000
+ ITERATION COUNT, LIMIT         6    2147483647
+*** This solver runs with a demo license. No commercial use.
+--- GMO setup time: 0.00s
+--- GMO memory 0.51 Mb (peak 0.51 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.1.0 link memory 0.00 Mb (peak 0.01 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.03sec (det. 0.20 ticks)
+
+--- Returning a primal only solution to GAMS (marginals all set to NA).
+--- Fixing integer variables and solving final LP...
+
+
+--- Fixed MIP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.03 ticks)
+
+
+Proven optimal solution
+MIP Solution:        -3449.500000    (6 iterations, 0 nodes)
+Final Solve:         -3449.500000    (0 iterations)
+
+Best possible:       -3449.500000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU obj                 .              .              .             1.0000      
+
+  obj  objective function
+
+---- EQU cond1  z<=d
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+i1.k1        -INF            3.0000         3.0000          .          
+i1.k2        -INF            7.0000         7.0000          .          
+i2.k1        -INF            5.0000         5.0000          .          
+i2.k2        -INF            4.0000         4.0000          .          
+i3.k1        -INF            4.0000         4.0000          .          
+i3.k2        -INF            4.0000         4.0000          .          
+i4.k1        -INF            4.0000         4.0000          .          
+i4.k2        -INF            7.0000         7.0000          .          
+i5.k1        -INF            3.0000         3.0000          .          
+i5.k2        -INF            5.0000         5.0000          .          
+i6.k1        -INF            9.0000         9.0000          .          
+i6.k2        -INF            5.0000         5.0000          .          
+i7.k1        -INF            9.0000         9.0000          .          
+i7.k2        -INF            6.0000         6.0000          .          
+i8.k1        -INF            3.0000         3.0000          .          
+i8.k2        -INF            6.0000         6.0000          .          
+
+---- EQU cond2  y=x-A^T*z
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+j1.k1          .              .              .              .          
+j1.k2          .              .              .              .          
+j2.k1          .              .              .              .          
+j2.k2          .              .              .              .          
+j3.k1          .              .              .              .          
+j3.k2          .              .              .              .          
+j4.k1          .              .              .              .          
+j4.k2          .              .              .              .          
+j5.k1          .              .              .              .          
+j5.k2          .              .              .              .          
+
+---- EQU xcond  x>=0
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+j1        -INF          -58.0000          .              .          
+j2        -INF          -62.0000          .              .          
+j3        -INF          -79.0000          .              .          
+j4        -INF          -52.0000          .              .          
+j5        -INF          -83.0000          .              .          
+
+---- EQU ycond  y>=0
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+j1.k1        -INF          -10.0000          .              .          
+j1.k2        -INF             .              .              .          
+j2.k1        -INF           -6.0000          .              .          
+j2.k2        -INF             .              .              .          
+j3.k1        -INF          -11.0000          .              .          
+j3.k2        -INF             .              .              .          
+j4.k1        -INF             .              .              .          
+j4.k2        -INF           -5.0000          .              .          
+j5.k1        -INF             .              .              .          
+j5.k2        -INF          -17.0000          .              .          
+
+---- EQU zcond  z>=0
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+i1.k1        -INF           -3.0000          .              .          
+i1.k2        -INF           -7.0000          .              .          
+i2.k1        -INF           -5.0000          .              .          
+i2.k2        -INF           -4.0000          .              .          
+i3.k1        -INF           -4.0000          .              .          
+i3.k2        -INF           -4.0000          .              .          
+i4.k1        -INF           -4.0000          .              .          
+i4.k2        -INF           -7.0000          .              .          
+i5.k1        -INF           -3.0000          .              .          
+i5.k2        -INF           -5.0000          .              .          
+i6.k1        -INF           -9.0000          .              .          
+i6.k2        -INF           -5.0000          .              .          
+i7.k1        -INF           -9.0000          .              .          
+i7.k2        -INF           -6.0000          .              .          
+i8.k1        -INF           -3.0000          .              .          
+i8.k2        -INF           -6.0000          .              .          
+
+---- VAR x  num of part ordered
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+j1          .            58.0000        +INF            8.0000      
+j2          .            62.0000        +INF           12.0000      
+j3          .            79.0000        +INF           12.0000      
+j4          .            52.0000        +INF           14.0000      
+j5          .            83.0000        +INF            9.0000      
+
+---- VAR y  num of part left
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+j1.k1          .            10.0000        +INF           -3.5000      
+j1.k2          .              .            +INF           -3.5000      
+j2.k1          .             6.0000        +INF           -3.0000      
+j2.k2          .              .            +INF           -3.0000      
+j3.k1          .            11.0000        +INF           -2.0000      
+j3.k2          .              .            +INF           -2.0000      
+j4.k1          .              .            +INF           -3.0000      
+j4.k2          .             5.0000        +INF           -3.0000      
+j5.k1          .              .            +INF           -3.5000      
+j5.k2          .            17.0000        +INF           -3.5000      
+
+---- VAR z  num of product
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+i1.k1          .             3.0000        +INF          -89.0000      
+i1.k2          .             7.0000        +INF          -89.0000      
+i2.k1          .             5.0000        +INF          -83.5000      
+i2.k2          .             4.0000        +INF          -83.5000      
+i3.k1          .             4.0000        +INF          -91.5000      
+i3.k2          .             4.0000        +INF          -91.5000      
+i4.k1          .             4.0000        +INF          -82.5000      
+i4.k2          .             7.0000        +INF          -82.5000      
+i5.k1          .             3.0000        +INF          -80.0000      
+i5.k2          .             5.0000        +INF          -80.0000      
+i6.k1          .             9.0000        +INF          -71.0000      
+i6.k2          .             5.0000        +INF          -71.0000      
+i7.k1          .             9.0000        +INF          -91.5000      
+i7.k2          .             6.0000        +INF          -91.5000      
+i8.k1          .             3.0000        +INF          -71.5000      
+i8.k2          .             6.0000        +INF          -71.5000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR g                 -INF        -3449.5000        +INF             .          
+
+  g  total profit
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 45.4.0  19dc3313 Nov 27, 2023          WEX-WEI x86 64bit/MS Windows - 12/12/23 23:43:45 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+----     55 VARIABLE g.L                   =    -3449.500  total profit
+
+----     55 VARIABLE x.L  num of part ordered
+
+j1 58.000,    j2 62.000,    j3 79.000,    j4 52.000,    j5 83.000
+
+
+----     55 VARIABLE y.L  num of part left
+
+            k1          k2
+
+j1      10.000
+j2       6.000
+j3      11.000
+j4                   5.000
+j5                  17.000
+
+
+----     55 VARIABLE z.L  num of product
+
+            k1          k2
+
+i1       3.000       7.000
+i2       5.000       4.000
+i3       4.000       4.000
+i4       4.000       7.000
+i5       3.000       5.000
+i6       9.000       5.000
+i7       9.000       6.000
+i8       3.000       6.000
+
+
+----     55 PARAMETER d  demand of product i in each scenario
+
+            k1          k2
+
+i1       3.000       7.000
+i2       5.000       4.000
+i3       4.000       4.000
+i4       4.000       7.000
+i5       3.000       5.000
+i6       9.000       5.000
+i7       9.000       6.000
+i8       3.000       6.000
+
+
+
+EXECUTION TIME       =        0.375 SECONDS      4 MB  45.4.0 19dc3313 WEX-WEI
+
+
+USER: GAMS Demo, for EULA and demo limitations see   G230930/0001CB-GEN
+      https://www.gams.com/latest/docs/UG%5FLicense.html         DC0000
+
+
+**** FILE SUMMARY
+
+Input      D:\HCMUT\HK231\Math Model\BTL\SLPWR.gms
+Output     D:\HCMUT\HK231\Math Model\BTL\SLPWR.lst
